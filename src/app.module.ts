@@ -1,7 +1,14 @@
-import { BullModule } from '@nestjs/bull';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { BullModule, InjectQueue } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { MiddlewareBuilder } from '@nestjs/core';
+import { Queue } from 'bull';
 import { CreateUserController } from './create-user/create-user.controller';
+import { SendMailConsumer } from './jobs/sendMailer-consumer';
+import { SendMailerProducerService } from './jobs/sendMailer-producer-service';
+import { createBullBoard } from 'bull-board';
+import { BullAdapter } from 'bull-board/bullAdapter';
 
 @Module({
   imports: [
@@ -9,12 +16,32 @@ import { CreateUserController } from './create-user/create-user.controller';
     BullModule.forRoot({
       redis: {
         host: process.env.REDIS_HOST,
-        port: parseInt(process.env.REDIS_PORT, 10),
+        port: Number(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
+      },
+    }),
+    BullModule.registerQueue({
+      name: 'sendMail-queue',
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.EMAIL_HOST,
+        port: Number(process.env.EMAIL_PORT),
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASSWORD,
+        },
       },
     }),
   ],
   controllers: [CreateUserController],
-  providers: [],
+  providers: [SendMailerProducerService, SendMailConsumer],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(@InjectQueue('sendMail-queue') private sendMailQueue: Queue) {}
+
+  configure(consumer: MiddlewareBuilder) {
+    const { router } = createBullBoard([new BullAdapter(this.sendMailQueue)]);
+    consumer.apply(router).forRoutes('/admin/queues');
+  }
+}
