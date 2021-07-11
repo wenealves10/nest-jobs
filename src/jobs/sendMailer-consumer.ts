@@ -21,7 +21,7 @@ class SendMailConsumer {
       to: data.email,
       from: 'Guia Cássia <matheusvilelaabrao@gmail.com>',
       subject: 'Guia Cássia!',
-      text: `<b>Olá ${data.name}</b>\n <p>Seja bem vindo a plataforma Guia Cássia!</p>\n<p>Em breve vamos te notificar quando estive no ar para todo Brasil!\n <a href="https://guiacassia.com.br/" target="_blank">Guia Cássia</a></p>`,
+      html: `<b>Olá ${data.name}</b>\n <p>Seja bem vindo a plataforma Guia Cássia!</p>\n<p>Em breve vamos te notificar quando estive no ar para todo Brasil!\n <a href="https://guiacassia.com.br/" target="_blank">Guia Cássia</a></p>`,
     });
   }
 
