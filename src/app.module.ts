@@ -25,11 +25,10 @@ import { BullAdapter } from 'bull-board/bullAdapter';
     }),
     MailerModule.forRoot({
       transport: {
-        host: process.env.EMAIL_HOST,
-        port: Number(process.env.EMAIL_PORT),
+        service: 'gmail',
         auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD,
+          user: process.env.LOGIN_EMAIL,
+          pass: process.env.LOGIN_EMAIL_PASSWORD,
         },
       },
     }),
